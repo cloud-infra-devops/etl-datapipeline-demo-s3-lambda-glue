@@ -37,7 +37,7 @@ variable "env" {
 
 variable "versioning" {
   type    = string
-  default = "Enabled"
+  default = "Disabled"
   validation {
     condition     = contains(["Enabled", "Disabled"], var.versioning)
     error_message = "S3 Bucket Versioning must be one of: Enabled or Disabled"

@@ -8,6 +8,7 @@ data "archive_file" "lambda_function_zip" {
 }
 
 data "aws_s3_bucket" "s3_bucket" {
-  for_each = var.name
-  bucket   = each.value
+  depends_on = [aws_s3_bucket.this]
+  for_each   = var.name
+  bucket     = each.value
 }

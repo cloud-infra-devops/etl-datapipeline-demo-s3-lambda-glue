@@ -1,78 +1,3 @@
-data "aws_iam_policy_document" "glue_trust_policy_document" {
-  statement {
-    sid     = ""
-    effect  = "Allow"
-    actions = ["sts:AssumeRole"]
-
-    principals {
-      type        = "Service"
-      identifiers = ["glue.amazonaws.com"]
-    }
-  }
-}
-
-data "aws_iam_policy_document" "glue_policy_document" {
-  statement {
-    effect    = "Allow"
-    actions   = ["s3:ListBucket"]
-    resources = ["${data.aws_s3_bucket.s3_bucket["s3_first_bucket_name"].arn}"]
-  }
-
-  statement {
-    effect  = "Allow"
-    actions = ["s3:GetObject"]
-    resources = [
-      # "${data.aws_s3_bucket.s3_bucket["s3_first_bucket_name"].arn}/sample.json",
-      "${data.aws_s3_bucket.s3_bucket["s3_first_bucket_name"].arn}/*"
-    ]
-  }
-
-  statement {
-    effect = "Allow"
-    actions = [
-      # "s3:GetObject",
-      # "s3:PutObject",
-      # "s3:ListObject",
-      # "s3:DeleteObject",
-      "s3:*",
-      # "glue:*",
-      # "iam:*",
-    ]
-    resources = [
-      "${data.aws_s3_bucket.s3_bucket["s3_second_bucket_name"].arn}",
-      "${data.aws_s3_bucket.s3_bucket["s3_second_bucket_name"].arn}/*",
-      "${data.aws_s3_bucket.s3_bucket["s3_third_bucket_name"].arn}",
-      "${data.aws_s3_bucket.s3_bucket["s3_third_bucket_name"].arn}/*"
-    ]
-  }
-
-  statement {
-    effect = "Allow"
-    actions = [
-      "logs:CreateLogGroup",
-      "logs:CreateLogStream",
-      "logs:PutLogEvents"
-    ]
-    resources = ["arn:aws:logs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws-glue/jobs/*"]
-  }
-}
-
-resource "aws_iam_policy" "glue_policy" {
-  name        = "Glue_Policy"
-  description = "allows for running glue job in the glue console and access destination s3 bucket"
-  policy      = data.aws_iam_policy_document.glue_policy_document.json
-}
-
-resource "aws_iam_role" "glue_role" {
-  name               = "aws_glue_job_role"
-  assume_role_policy = data.aws_iam_policy_document.glue_trust_policy_document.json
-}
-
-resource "aws_iam_role_policy_attachment" "glue_role_policy_attachment" {
-  role       = aws_iam_role.glue_role.name
-  policy_arn = aws_iam_policy.glue_policy.arn
-}
-
 resource "aws_s3_object" "python_pyspark_script" {
   bucket = data.aws_s3_bucket.s3_bucket["s3_third_bucket_name"].id
   key    = "glue/scripts/pyspark_script.py"
@@ -81,6 +6,7 @@ resource "aws_s3_object" "python_pyspark_script" {
 }
 
 resource "aws_glue_job" "json_to_csv" {
+  depends_on        = [aws_s3_bucket.this, aws_s3_object.python_pyspark_script, aws_iam_policy.glue_policy, aws_iam_role.glue_role, aws_iam_role_policy_attachment.glue_role_policy_attachment]
   glue_version      = "5.0"                      # Optional
   max_retries       = 0                          # Optional
   name              = var.glue_job_name          # Required
