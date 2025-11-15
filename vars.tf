@@ -7,22 +7,22 @@ variable "region" {
 variable "aws_account_id" {
   description = "The AWS account ID to deploy resources"
   type        = string
-  default     = "211125325120"
+  default     = "" #Put AWS Account ID
 }
 
 variable "name" {
   description = "value representing the name of the S3 bucket"
   type        = map(string)
   default = {
-    "s3_first_bucket_name"  = "source-json-s3-duke-ima-poc"
-    "s3_second_bucket_name" = "destination-csv-s3-duke-ima-poc"
-    "s3_third_bucket_name"  = "pyspark-src-s3-duke-ima-poc"
+    "s3_first_bucket_name"  = "bkt-source-json-data"
+    "s3_second_bucket_name" = "bkt-destination-csv-data"
+    "s3_third_bucket_name"  = "bkt-pyspark-src-code"
   }
 }
 variable "project" {
   description = "Project name"
   type        = string
-  default     = "duke-energy-ima"
+  default     = "json-to-csv-etl-datapipeline"
 }
 
 variable "env" {
