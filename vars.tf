@@ -101,5 +101,5 @@ variable "glue_job_name" {
 variable "cw_logs_retention_period_days" {
   description = "Cloudwatch Logs Retention Period in Days"
   type        = number
-  default     = 1
+  default     = 3
 }
