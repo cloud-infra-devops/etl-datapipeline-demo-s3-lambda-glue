@@ -1,18 +1,3 @@
-# https://aws.amazon.com/blogs/security/use-iam-roles-to-connect-github-actions-to-actions-in-aws/
-# https://wearecommunity.io/communities/devops-india/articles/4552#
-# https://skundunotes.com/2025/01/03/provision-aws-resources-with-github-and-hcp-terraform/
-# https://skundunotes.com/2023/03/07/ci-cd-with-terraform-and-github-actions-to-deploy-to-aws/
-# https://skundunotes.com/2023/02/28/securely-integrate-aws-credentials-with-github-actions-using-openid-connect/
-# https://faun.pub/terraform-cloud-f03fb4eaaa87
-# https://faun.pub/terraform-cloud-with-github-actions-dc897ed06e0d
-# https://developer.hashicorp.com/terraform/tutorials/automation/github-actions
-# https://github.com/charandasari/null-github-actions-terra/blob/main/.github/workflows/null-terraform.yaml
-# https://medium.com/@charandasar/automating-infrastructure-deployment-ci-cd-with-github-actions-terraform-cloud-and-terraform-3097ab76ac87
-# https://terrateam.io/blog/ci-cd-pipeline-for-terraform
-# https://www.firefly.ai/academy/integrating-oidc-with-github-action-to-manage-terraform-deployment-on-aws
-# https://youtu.be/B55rso_UR6I?si=e27SuLNIt8gONeRx
-# https://www.cloudthat.com/resources/blog/a-guide-to-integrate-vcs-into-the-terraform-cloud
-
 name: "GitHubActions-HCP-Terraform"
 run-name: ${{ github.actor }} has triggered the Apply pipeline
 # Controls when the action will run. Invokes the workflow on push events but only for the main branch and on pull requests that modify Terraform files
@@ -35,7 +20,7 @@ permissions:
 
 jobs:
   terraform_IaC_deploy:
-    name: "Terraform_IaC_Deploy_to_AWS_via_HCP_Terraform_Cloud"
+    name: "GitHub Actions_Terraform_IaC_Deploy_to_AWS_via_HCP_Terraform_Cloud"
     runs-on: ubuntu-latest
     env:
       TF_CLOUD_ORGANIZATION: "cloud-infra-dev"
