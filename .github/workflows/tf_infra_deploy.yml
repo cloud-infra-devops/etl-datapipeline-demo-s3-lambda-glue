@@ -33,7 +33,7 @@ permissions:
   issues: write # Ensure this is added
 
 jobs:
-  terraform_apply:
+  terraform_IaC_deploy:
     name: "Terraform_apply"
     runs-on: ubuntu-latest
     env:
@@ -65,7 +65,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          role-session-name: ${{ secrets.ROLE_SESSION_NAME }}
+          role-session-name: GitHub_to_HCP_via_FederatedOIDC
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Verify IAM Role Assumption
