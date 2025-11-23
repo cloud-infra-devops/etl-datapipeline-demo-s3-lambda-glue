@@ -30,16 +30,17 @@ terraform {
   cloud {
     organization = "cloud-infra-dev"
     workspaces {
-      name    = "github-actions-oidc-hcp-terraform"
+      # name    = "github-actions-oidc-hcp-terraform"
+      name    = "etl-datapipeline-demo-s3-lambda-glue"
       project = "AWS-Cloud-IaC"
     }
   }
 }
 provider "aws" {
-  region              = var.region
-  access_key          = var.access_key
-  secret_key          = var.secret_key
-  token               = var.token
+  region = var.region
+  # access_key          = var.access_key
+  # secret_key          = var.secret_key
+  # token               = var.token
   allowed_account_ids = [var.aws_account_id]
 }
 # provider "vault" {
