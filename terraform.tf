@@ -30,8 +30,8 @@ terraform {
   cloud {
     organization = "cloud-infra-dev"
     workspaces {
-      # name    = "github-actions-oidc-hcp-terraform"
-      name    = "etl-datapipeline-demo-s3-lambda-glue"
+      name = "github-actions-oidc-hcp-terraform"
+      # name    = "etl-datapipeline-demo-s3-lambda-glue"
       project = "AWS-Cloud-IaC"
     }
   }
