@@ -1,7 +1,12 @@
 variable "region" {
   description = "The AWS region to deploy resources in"
   type        = string
-  # default     = "us-west-2"
+  default     = "us-west-2"
+}
+
+variable "aws_assume_role_arn" {
+  type    = string
+  default = "arn:aws:iam::211125325120:role/HCPTerraform-AWS-Federated-OIDC-Role"
 }
 
 variable "aws_account_id" {
@@ -10,20 +15,20 @@ variable "aws_account_id" {
   default     = "211125325120" #Put AWS Account ID
 }
 
-variable "access_key" {
-  type      = string
-  sensitive = true
-}
+# variable "access_key" {
+#   type      = string
+#   sensitive = true
+# }
 
-variable "secret_key" {
-  type      = string
-  sensitive = true
-}
+# variable "secret_key" {
+#   type      = string
+#   sensitive = true
+# }
 
-variable "token" {
-  type      = string
-  sensitive = true
-}
+# variable "token" {
+#   type      = string
+#   sensitive = true
+# }
 
 variable "name" {
   description = "value representing the name of the S3 bucket"
