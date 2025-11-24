@@ -42,7 +42,8 @@ provider "aws" {
   # secret_key = var.secret_key
   # token      = var.token
   assume_role {
-    role_arn = var.aws_assume_role_arn
+    role_arn     = var.aws_assume_role_arn
+    session_name = "GitHub_Actions-HCP_Terraform"
   }
   allowed_account_ids = [var.aws_account_id]
 }
