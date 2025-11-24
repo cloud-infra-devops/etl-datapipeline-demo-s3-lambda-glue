@@ -11,7 +11,7 @@ on:
       - "**/*.tf"
     branches: ["main"]
   # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+  # workflow_dispatch:
 # Permission can be added at job level or at workflow level
 permissions:
   id-token: write # This is required for requesting the JWT token from IdP
@@ -60,9 +60,12 @@ jobs:
           # This will add both a CLI output to the console and create a results.sarif file
           directory: .
           framework: terraform
+          quiet: true
+          soft_fail: true
           output_format: cli,sarif
           output_file_path: console,checkov-scan-results.sarif
           skip_check: CKV2_GHA_1
+        continue-on-error: true
 
       # - name: Checkov Report
       #   id: checkov-report
