@@ -4,10 +4,10 @@ variable "region" {
   default     = "us-west-2"
 }
 
-variable "aws_assume_role_arn" {
-  type    = string
-  default = "arn:aws:iam::211125325120:role/HCPTerraform-AWS-Federated-OIDC-Role"
-}
+# variable "aws_assume_role_arn" {
+#   type    = string
+#   default = "arn:aws:iam::211125325120:role/HCPTerraform-AWS-Federated-OIDC-Role"
+# }
 
 variable "aws_account_id" {
   description = "The AWS account ID to deploy resources"
