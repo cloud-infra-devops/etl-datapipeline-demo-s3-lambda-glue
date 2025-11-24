@@ -1,67 +1,237 @@
 name: checkov-static-analysis-scan
 # Controls when the workflow will run
 on:
-    # Triggers the workflow on push or pull request events but only for the "main" branch
-    push:
-        paths:
-            - "**/*.tf"
-        branches: ["*"]
-    pull_request:
-        paths:
-            - "**/*.tf"
-        branches: ["main"]
-    # Allows you to run this workflow manually from the Actions tab
-    workflow_dispatch:
-permissions: read-all
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    paths:
+      - "**/*.tf"
+    branches: ["*"]
+  pull_request:
+    paths:
+      - "**/*.tf"
+    branches: ["main"]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+# Permission can be added at job level or at workflow level
+permissions:
+  id-token: write # This is required for requesting the JWT token from IdP
+  contents: read # This is required for actions/checkout
+  pull-requests: write # This is required for gh bot to comment PR
+  security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+  actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+  checks: write
+  issues: write # Ensure this is added
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-    # This workflow contains a single job called "checkov_scan"
-    checkov_scan:
-        permissions:
-            contents: read # for actions/checkout to fetch code
-            security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
-            actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+  # This workflow contains a single job called "checkov_scan"
+  checkov_scan:
+    # permissions:
+    #   contents: read # for actions/checkout to fetch code
+    #   security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+    #   actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+    name: Run Checkov
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    # env:
+    #   TF_CLOUD_ORGANIZATION: "cloud-infra-dev"
+    #   TF_API_TOKEN: "${{ secrets.TF_API_TOKEN }}"
+    #   TF_WORKSPACE: "github-actions-oidc-hcp-terraform"
+    #   CONFIG_DIRECTORY: "./"
+    #   TF_LOG: INFO
+    #   AWS_REGION: ${{ secrets.AWS_REGION }}
 
-        # The type of runner that the job will run on
-        runs-on: ubuntu-latest
-        name: Run Checkov
-        # Steps represent a sequence of tasks that will be executed as part of the job
-        steps:
-            # Checks-out your repository under $GITHUB_WORKSPACE, so follow-up steps can access it
-            - name: Checkout Code
-              uses: actions/checkout@v3
+    defaults:
+      run:
+        shell: bash
 
-            - name: Set up Python
-              uses: actions/setup-python@v4
-              with:
-                  python-version: "3.13"
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so follow-up steps can access it
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-            - name: Install Checkov
-              run: pip install checkov
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
 
-            - name: Run Checkov
-              run: checkov -d .
+      - name: Install Checkov
+        run: pip install checkov
 
-            - name: Checkov GitHub Action
-              id: checkov
-              uses: bridgecrewio/checkov-action@v12
-              with:
-                  # This will add both a CLI output to the console and create a results.sarif file
-                  directory: .
-                  framework: terraform
-                  output_format: cli,sarif
-                  output_file_path: console,checkov-scan-results.sarif
-                  #https://github.com/bridgecrewio/checkov/issues/6216
-                  skip_check: CKV2_GHA_1
+      - name: Run Checkov
+        run: checkov -d .
 
-            - name: Upload SARIF file
-              uses: github/codeql-action/upload-sarif@v2
+      - name: Checkov GitHub Action
+        id: checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          # This will add both a CLI output to the console and create a results.sarif file
+          directory: .
+          framework: terraform
+          output_format: cli,sarif
+          output_file_path: console,checkov-scan-results.sarif
+          #https://github.com/bridgecrewio/checkov/issues/6216
+          skip_check: CKV2_GHA_1
+      - name: Checkov Report
+        id: checkov-report
+        working-directory: .
+        run: |
+          while IFS= read -r line; do
+          echo "$line" >> $GITHUB_STEP_SUMMARY
+          done < results_checkov_failed_only.md
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
 
-              # Results are generated only on a success or failure
-              # this is required since GitHub by default won't run the next step
-              # when the previous one has failed. Security checks that do not pass will 'fail'.
-              # An alternative is to add `continue-on-error: true` to the previous step
-              # Or 'soft_fail: true' to checkov.
-              if: success() || failure()
-              with:
-                  sarif_file: results.sarif
+        # Results are generated only on a success or failure
+        # this is required since GitHub by default won't run the next step
+        # when the previous one has failed. Security checks that do not pass will 'fail'.
+        # An alternative is to add `continue-on-error: true` to the previous step
+        # Or 'soft_fail: true' to checkov.
+        if: success() || failure()
+        with:
+          sarif_file: results.sarif
+
+  plan:
+    name: "Terraform Plan"
+    runs-on: ubuntu-latest
+    needs: [checkov_scan]
+    defaults:
+      run:
+        shell: bash
+    env:
+      TF_CLOUD_ORGANIZATION: "cloud-infra-dev"
+      TF_API_TOKEN: "${{ secrets.TF_API_TOKEN }}"
+      TF_WORKSPACE: "github-actions-oidc-hcp-terraform"
+      CONFIG_DIRECTORY: "./"
+      TF_LOG: INFO
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+
+    steps:
+      - name: "Checkout code from Repository (same as git clone)"
+        uses: actions/checkout@v4
+
+      # - name: Upload Configuration
+      #   uses: hashicorp/tfc-workflows-github/actions/upload-configuration@v1.0.0
+      #   id: plan-upload
+      #   with:
+      #     workspace: ${{ env.TF_WORKSPACE }}
+      #     directory: ${{ env.CONFIG_DIRECTORY }}
+      #     speculative: true
+
+      - name: "Configure AWS Credentials"
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: ${{ secrets.ROLE_SESSION_NAME}}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Verify IAM Role Assumption
+        run: |
+          aws sts get-caller-identity
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+          terraform_version: 1.14.0
+
+      - name: Terraform Init
+        id: init
+        run: |
+          echo -e "access_key = \"${AWS_ACCESS_KEY_ID}\"\nsecret_key = \"${AWS_SECRET_ACCESS_KEY}\"\ntoken = \"${AWS_SESSION_TOKEN}\"\nregion = \"${AWS_REGION}\"" | tee credentials.auto.tfvars
+          terraform init
+        env:
+          TF_LOG: ERROR
+
+      - name: Terraform Fmt
+        id: fmt
+        run: terraform fmt --recursive
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate
+        env:
+          TF_LOG: ERROR
+
+      # Generates an execution plan for Terraform
+      - name: Terraform Plan
+        run: terraform plan -var-file="credentials.auto.tfvars" -input=false -out=tfplan
+        continue-on-error: true # "continue-on-error: true" ensures the workflow continues even if the plan fails, so you still get feedback about what went wrong
+        env:
+          TF_VAR_read_only: true
+          TF_LOG: ERROR
+
+      - name: Upload Plan Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: tfplan
+          path: tfplan
+      # - name: Save Terraform Plan Output
+      #   if: github.event_name == 'pull_request'
+      #   run: terraform show -json tfplan > plan.json
+      #   env:
+      #     TF_LOG: ERROR
+
+      # - name: Create PR Comment with Plan Output
+      #   if: github.event_name == 'pull_request'
+      #   uses: actions/github-script@v6
+      #   with:
+      #     script: |
+      #       const fs = require('fs');
+      #       const planOutput = fs.readFileSync('plan.json', 'utf8');
+      #       const comment = `### Terraform Plan Result\n\`\`\`json\n${planOutput}\n\`\`\``;
+      #       const issue_number = context.payload.pull_request.number;
+      #       const owner = context.repo.owner;
+      #       const repo = context.repo.repo;
+      #       await github.rest.issues.createComment({
+      #         owner,
+      #         repo,
+      #         issue_number,
+      #         body: comment,
+      #       });
+
+  apply:
+    name: "Terraform Apply"
+    runs-on: ubuntu-latest
+    needs: [plan]
+    defaults:
+      run:
+        shell: bash
+    env:
+      TF_CLOUD_ORGANIZATION: "cloud-infra-dev"
+      TF_API_TOKEN: "${{ secrets.TF_API_TOKEN }}"
+      TF_WORKSPACE: "github-actions-oidc-hcp-terraform"
+      CONFIG_DIRECTORY: "./"
+      TF_LOG: INFO
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+
+    steps:
+      - name: "Checkout code from Repository (same as git clone)"
+        uses: actions/checkout@v4
+
+      - name: "Configure AWS Credentials"
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: ${{ secrets.ROLE_SESSION_NAME}}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+          terraform_version: 1.14.0
+
+      - name: Download Plan Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: tfplan
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve tfplan
+        env:
+          TF_LOG: ERROR
