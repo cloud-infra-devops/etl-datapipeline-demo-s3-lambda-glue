@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.0.0"
+  required_version = ">= 1.14.0"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -18,14 +18,6 @@ terraform {
     #   version = "3.7.2"
     # }
   }
-
-  # backend "remote" {
-  #   hostname = "app.terraform.io"
-  #   organization = "cloud_infra_dev"
-  #   workspaces {
-  #     prefix = "github_actions_aws_"
-  #   }
-  # }
 
   cloud {
     organization = "cloud-infra-dev"
