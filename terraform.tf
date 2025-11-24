@@ -30,8 +30,8 @@ terraform {
   cloud {
     organization = "cloud-infra-dev"
     workspaces {
-      name = "github-actions-oidc-hcp-terraform" # Workspace with VCS driven workflow
-      # name    = "etl-datapipeline-demo-s3-lambda-glue" # Workspace with API driven workflow
+      # name = "github-actions-oidc-hcp-terraform" # Workspace with VCS driven workflow
+      name    = "etl-datapipeline-demo-s3-lambda-glue" # Workspace with API driven workflow
       project = "AWS-Cloud-IaC"
     }
   }
