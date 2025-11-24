@@ -32,14 +32,6 @@ jobs:
     name: Run Checkov
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-    # env:
-    #   TF_CLOUD_ORGANIZATION: "cloud-infra-dev"
-    #   TF_API_TOKEN: "${{ secrets.TF_API_TOKEN }}"
-    #   TF_WORKSPACE: "github-actions-oidc-hcp-terraform"
-    #   CONFIG_DIRECTORY: "./"
-    #   TF_LOG: INFO
-    #   AWS_REGION: ${{ secrets.AWS_REGION }}
-
     defaults:
       run:
         shell: bash
@@ -70,7 +62,6 @@ jobs:
           framework: terraform
           output_format: cli,sarif
           output_file_path: console,checkov-scan-results.sarif
-          #https://github.com/bridgecrewio/checkov/issues/6216
           skip_check: CKV2_GHA_1
       - name: Checkov Report
         id: checkov-report
@@ -89,7 +80,7 @@ jobs:
         # Or 'soft_fail: true' to checkov.
         if: success() || failure()
         with:
-          sarif_file: results.sarif
+          sarif_file: checkov-scan-results.sarif
 
   plan:
     name: "Terraform Plan"
