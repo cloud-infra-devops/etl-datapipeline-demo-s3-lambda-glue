@@ -166,7 +166,7 @@ jobs:
           TF_LOG: ERROR
 
       - name: Upload Plan Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: tfplan
           path: tfplan
@@ -227,7 +227,7 @@ jobs:
           terraform_version: 1.14.0
 
       - name: Download Plan Artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: tfplan
 
