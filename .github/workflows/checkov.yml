@@ -1,15 +1,15 @@
 name: checkov-static-analysis-scan
-# Controls when the workflow will run
+run-name: ${{ github.actor }} has triggered the Apply pipeline
+# Controls when the action will run. Invokes the workflow on push events but only for the main branch and on pull requests that modify Terraform files
 on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    paths:
-      - "**/*.tf"
-    branches: ["*"]
-  pull_request:
-    paths:
-      - "**/*.tf"
     branches: ["main"]
+    # paths: ["**/*.tf", "**.tfvars"]
+  pull_request:
+    branches: ["main"]
+    paths: ["**.tf", "**.tfvars"]
+    types: [opened, synchronize, reopened]
   # Allows you to run this workflow manually from the Actions tab
   # workflow_dispatch:
 # Permission can be added at job level or at workflow level
