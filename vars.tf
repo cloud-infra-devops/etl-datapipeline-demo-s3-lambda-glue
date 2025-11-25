@@ -42,7 +42,7 @@ variable "name" {
 
 variable "s3_log_bucket" {
   type    = string
-  default = "bkt-s3-logging-etl-datapipeline"
+  default = "bkt-s3-access-logging-etl-datapipeline"
 }
 variable "project" {
   description = "Project name"
