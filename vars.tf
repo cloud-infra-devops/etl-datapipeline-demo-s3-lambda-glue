@@ -39,6 +39,11 @@ variable "name" {
     "s3_third_bucket_name"  = "bkt03-pyspark-src-code"
   }
 }
+
+variable "s3_log_bucket" {
+  type    = string
+  default = "bkt-s3-access-logging-etl-datapipeline"
+}
 variable "project" {
   description = "Project name"
   type        = string
