@@ -1,6 +1,32 @@
 data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
+locals {
+  bucket_policy_default_permission = [
+    "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+  ]
+}
+
+## s3 bucket policy
+data "aws_iam_policy_document" "this" {
+  for_each = var.name
+  version  = "2012-10-17"
+  statement {
+    effect = "Allow"
+    principals {
+      type        = "AWS"
+      identifiers = local.bucket_policy_default_permission
+    }
+    actions = [
+      "s3:*"
+    ]
+    resources = [
+      "${aws_s3_bucket.this[each.key].arn}/*",
+      "${aws_s3_bucket.this[each.key].arn}"
+    ]
+  }
+}
+
 data "archive_file" "lambda_function_zip" {
   type        = "zip"
   source_file = "${path.module}/index.py"
