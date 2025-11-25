@@ -5,6 +5,10 @@ output "s3_bucket_names" {
   description = "Map of S3 bucket ids keyed by bucket resource key"
   value       = { for k, b in aws_s3_bucket.this : k => b.id }
 }
+output "s3_access_logs_bucket_name" {
+  description = "S3 Access Log Bucket Name"
+  value       = aws_s3_bucket.log_bucket.id
+}
 output "glue_job_name" {
   value = aws_glue_job.json_to_csv.name
 }
@@ -16,6 +20,9 @@ output "second_bucket_arn" {
 }
 output "third_bucket_arn" {
   value = data.aws_s3_bucket.s3_bucket["s3_third_bucket_name"].arn
+}
+output "s3_access_logs_bucket_arn" {
+  value = aws_s3_bucket.log_bucket.arn
 }
 output "glue_role_arn" {
   value = aws_iam_role.glue_role.arn
