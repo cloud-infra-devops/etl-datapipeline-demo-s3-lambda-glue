@@ -13,6 +13,19 @@ resource "aws_s3_bucket" "this" {
   )
 }
 
+resource "aws_s3_bucket" "log_bucket" {
+  depends_on = [aws_s3_bucket.this]
+  bucket     = var.s3_log_bucket
+  acl        = "log-delivery-write" # Grants log delivery group write permissions
+}
+
+resource "aws_s3_bucket_logging" "source_bucket_logging" {
+  depends_on    = [aws_s3_bucket.this]
+  for_each      = var.name
+  bucket        = aws_s3_bucket.this[each.key].id
+  target_bucket = aws_s3_bucket.log_bucket.id
+  target_prefix = "s3-logs/" # Optional prefix for log objects within the target bucket
+}
 resource "aws_s3_bucket_versioning" "this" {
   depends_on = [aws_s3_bucket.this]
   for_each   = var.name
