@@ -1,5 +1,5 @@
 name: checkov-static-analysis-scan
-run-name: ${{ github.actor }} has triggered the Apply pipeline
+run-name: ${{ github.actor }} has triggered the GitHub Actions
 # Controls when the action will run. Invokes the workflow on push events but only for the main branch and on pull requests that modify Terraform files
 on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
@@ -12,6 +12,7 @@ on:
     types: [opened, synchronize, reopened]
   # Allows you to run this workflow manually from the Actions tab
   # workflow_dispatch:
+
 # Permission can be added at job level or at workflow level
 permissions:
   id-token: write # This is required for requesting the JWT token from IdP
@@ -21,9 +22,10 @@ permissions:
   actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
   checks: write
   issues: write # Ensure this is added
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
+# This workflow contains the following sequential jobs - "checkov_scan", "tflint", "plan" and "apply"
 jobs:
-  # This workflow contains a single job called "checkov_scan"
   checkov_scan:
     name: Run Checkov
     # The type of runner that the job will run on
@@ -36,10 +38,12 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so follow-up steps can access it
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5.0.1
+        # uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6.1.0
+        # uses: actions/setup-python@v4
         with:
           python-version: "3.13"
 
@@ -88,13 +92,15 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5.0.1
+        # uses: actions/checkout@v4
       - name: Setup TFLint
         run: curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
       - name: Install Terraform plugins
         run: tflint --init
       - name: Lint Terraform files
         run: tflint
+
   # plan:
   #   name: "Terraform Plan"
   #   runs-on: ubuntu-latest
@@ -109,7 +115,6 @@ jobs:
   #     TF_WORKSPACE: "etl-datapipeline-demo-s3-lambda-glue"
   #     CONFIG_DIRECTORY: "./"
   #     TF_LOG: INFO
-  #     AWS_REGION: ${{ secrets.AWS_REGION }}
 
   #   steps:
   #     - name: "Checkout code from Repository (same as git clone)"
@@ -123,7 +128,7 @@ jobs:
   #     #     directory: ${{ env.CONFIG_DIRECTORY }}
   #     #     speculative: true
 
-  #     - name: "Configure AWS Credentials"
+  #     - name: Configure AWS Credentials
   #       uses: aws-actions/configure-aws-credentials@v4
   #       with:
   #         role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
